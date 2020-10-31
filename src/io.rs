@@ -1,7 +1,8 @@
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{self, BufReader};
+use std::io::BufReader;
 use std::path::Path;
+use url::Url;
 
 pub fn io() {
     let path = Path::new("src/data/content.txt");
@@ -12,15 +13,22 @@ pub fn io() {
         Ok(file) => file,
     };
 
-    let mut reader = BufReader::new(file);
-    let mut s = String::new();
+    let lines = BufReader::new(file);
 
-    /* match reader.read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display, why),
-        Ok(_) => println!("{}", s),
-    } */
-
-    for read in reader.lines() {
-        println!("line {}", read.unwrap());
+    for line in lines.lines() {
+        match line {
+            Ok(url) => {
+                if !url.is_empty() {
+                    match Url::parse(&url) {
+                        Ok(u) => {
+                            println!("{:?}", Some(&u));
+                            Some(&u)
+                        }
+                        Err(_) => None,
+                    };
+                };
+            }
+            Err(error) => panic!("couldnt {}", error),
+        }
     }
 }
